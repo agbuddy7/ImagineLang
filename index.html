@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImagineLang</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+       
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .input-section {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        #promptInput {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+          
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        #promptInput:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+        
+        button {
+            background: #4285f4;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+       
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #3367d6;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .response-section {
+            margin-top: 30px;
+        }
+        
+        #responseBox {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+           
+            background: #fafafa;
+            font-size: 14px;
+            line-height: 1.5;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #d73502;
+            background: #ffeaea;
+            border-color: #d73502;
+        }
+        
+        .success {
+            color: #333;
+            background: #f0f8ff;
+            border-color: #4285f4;
+        }
+    </style>
+</head>
+<body>
+   <div class="container">
+    <h1>ImagineLang</h1>
+    <h2>choose from the below options to mold your new language</h2>
+
+    
+    <div class="input-section">
+      <label for="styleSelect">Where would your language speaker live:</label>
+      <select id="styleSelect">
+        <option value="something like Elegant or Elvish (flowing, lyrical, poetic),occasionly use syllable- la or sa or he">Mountains</option>
+        <option value="something like Alien or Klingon (harsh, guttural, alien),occasionly use syllable- ku or ti or pr">Mars</option>
+        <option value="something like tribal or Na'vi (melodic, tribal, nature-inspired),occasionly use syllable- tam or nik or po">Rainforest</option>
+        <option value="something like Dothraki (rough, warrior-like),occasionly use syllable- jo or kar or mak">Plains</option>
+        <option value="something like Playful gibberish (Minion-style), occasionly use syllable- yii or pee or che">Holes</option>
+      </select>
+
+      <label for="grammarSelect">Any real life language style you like:</label>
+      <select id="grammarSelect">
+        <option value="SVO (Subject-Verb-Object)">English style</option>
+        <option value="SOV (Subject-Object-Verb)">Japanese style</option>
+        <option value="OVS (Object-Verb-Subject)">Something alien</option>
+      </select>
+
+      <label for="toneSelect">Choose Tone:</label>
+      <select id="toneSelect">
+        <option value="mystical and poetic">Mystical / Poetic</option>
+        <option value="harsh and aggressive">Harsh / Aggressive</option>
+        <option value="calm and melodic">Calm / Melodic</option>
+        <option value="playful and silly">Playful / Silly</option>
+      </select>
+    </div>
+
+  
+    <div class="input-section">
+      <label for="promptInput">Enter your sentence:</label>
+      <input 
+        type="text" 
+        id="promptInput" 
+        placeholder="Type a sentence to translate..."
+        onkeypress="handleKeyPress(event)"
+      >
+      <button onclick="sendPrompt()" id="sendButton">Generate Translation</button>
+    </div>
+
+ 
+    <div class="response-section">
+      <label for="responseBox">Response:</label>
+      <div id="responseBox">Enter a sentence and select options above to get started!</div>
+    </div>
+  </div>
+    <script>
+      async function sendPrompt() {
+  const style = document.getElementById('styleSelect').value;
+  const grammar = document.getElementById('grammarSelect').value;
+  const tone = document.getElementById('toneSelect').value;
+  const sentence = document.getElementById('promptInput').value.trim();
+
+  const responseBox = document.getElementById('responseBox');
+  const sendButton = document.getElementById('sendButton');
+
+  if (!sentence) {
+    responseBox.textContent = "⚠️ Please enter a sentence first!";
+    responseBox.className = "error";
+    return;
+  }
+
+
+  responseBox.textContent = "🤔 Thinking... Please wait.";
+  responseBox.className = "loading";
+  sendButton.disabled = true;
+  sendButton.textContent = "Processing...";
+
+  try {
+    const response = await fetch("http://localhost:3000/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ style, grammar, tone, sentence })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+
+    if (data.success && data.text) {
+      responseBox.textContent = data.text;
+      responseBox.className = "success";
+    } else {
+      responseBox.textContent = "Error: " + (data.error || "Unknown error");
+      responseBox.className = "error";
+    }
+  } catch (error) {
+    responseBox.textContent = "⚠️ Connection error: " + error.message;
+    responseBox.className = "error";
+  } finally {
+    sendButton.disabled = false;
+    sendButton.textContent = "Generate Translation";
+  }
+}
+
+function handleKeyPress(event) {
+  if (event.key === "Enter") {
+    sendPrompt();
+  }
+}
+    </script>
+</body>
+</html>
