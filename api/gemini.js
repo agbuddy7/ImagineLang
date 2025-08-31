@@ -29,7 +29,9 @@ Language Name: [Name of the imaginary language you generate]
 
 Translation: [Actual translation you generated]
 
-Breakdown: [breakdown of translation in English - tell which English word maps to which imaginary language word]
+Breakdown: [breakdown of translation in English - tell which English word maps to which imaginary language word (Dont add explanations)]
+
+(Dont talk any thing about prompt or what was prompted)
 `;
 
   try {
