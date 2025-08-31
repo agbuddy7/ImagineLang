@@ -111,6 +111,8 @@
    <div class="container">
     <h1>ImagineLang</h1>
     <h2>choose from the below options to mold your new language</h2>
+    <label for="styleSelect">(if there is an error generating language please wait as server may be starting)</label>
+    <br>
 
     
     <div class="input-section">
@@ -151,9 +153,10 @@
       <button onclick="sendPrompt()" id="sendButton">Generate Translation</button>
     </div>
 
- 
     <div class="response-section">
-      <label for="responseBox">Response:</label>
+      <label for="responseBox">Response:
+        (Note: it may not remember previous language if you regenerate )
+      </label>
       <div id="responseBox">Enter a sentence and select options above to get started!</div>
     </div>
   </div>
