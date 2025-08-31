@@ -1,10 +1,6 @@
-
-require('dotenv').config();
 const { GoogleGenAI } = require('@google/genai');
 
-const API_KEY = process.env.GOOGLE_AI_API_KEY;
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -28,14 +24,13 @@ Create a sentence in an imaginary language with these settings:
 Remember: Output shouldn't be gibberish but should be different sounding unique, something people can read, you can mix different languages to create new one... etc.
 
 Output format:
+
 Language Name: [Name of the imaginary language you generate]
 
 Translation: [Actual translation you generated]
 
 Breakdown: [breakdown of translation in English - tell which English word maps to which imaginary language word]
-  `
-
-  ;
+`;
 
   try {
     const response = await ai.models.generateContent({
