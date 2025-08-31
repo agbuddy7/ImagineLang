@@ -1,0 +1,10 @@
+{
+  "name": "imaginelang",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "^0.4.0",
+    "dotenv": "^16.3.1"
+  }
+}
