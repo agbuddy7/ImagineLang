@@ -1,8 +1,8 @@
-const { GoogleGenAI } = require('@google/genai');
+import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({});
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: "Method Not Allowed" });
     return;
@@ -44,4 +44,4 @@ Breakdown: [breakdown of translation in English - tell which English word maps t
   } catch (error) {
     res.status(500).json({ error: "Internal server error: " + error.message });
   }
-};
+}
