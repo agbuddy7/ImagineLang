@@ -1,6 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({});
+const ai = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_API_KEY
+});
 
 let currentLanguage = null;
 
@@ -110,7 +112,7 @@ Breakdown: [breakdown of translation in English - tell which English word maps t
       text: generatedText,
       hasStoredLanguage: currentLanguage !== null, 
       languageName: currentLanguage ? currentLanguage.name : null,
-      canContinue: !isUsingStoredLanguge && currentLanguage !== null
+      canContinue: !isUsingStoredLanguage && currentLanguage !== null
     });
 
   } catch (error) {
