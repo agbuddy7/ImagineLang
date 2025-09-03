@@ -113,7 +113,12 @@
     <h2>choose from the below options to mold your new language</h2>
     <label for="styleSelect">(if there is an error generating language please wait as server may be starting)</label>
     <br>
+        
 
+    <div id = "languageStatus" class = "language-status">
+      <strong>Currently using language:<span id ="currentLanguageName"></span></strong>
+      <p>click "Reset language" to create a new language</p>
+    </div>
     
     <div class="input-section">
       <label for="styleSelect">Where would your language speaker live:</label>
@@ -122,8 +127,14 @@
         <option value="something like Alien or Klingon (harsh, guttural, alien),occasionly use syllable- ku or ti or pr">Mars</option>
         <option value="something like tribal or Na'vi (melodic, tribal, nature-inspired),occasionly use syllable- tam or nik or po">Rainforest</option>
         <option value="something like Dothraki (rough, warrior-like),occasionly use syllable- jo or kar or mak">Plains</option>
-        <option value="something like Playful gibberish (Minion-style), occasionly use syllable- yii or pee or che">Holes</option>
+        <option value="something like Playful gibberish (Minion-style), occasionly use syllable- yii or pee or che">Burrows</option>
+        <option value="something like Mechancical  (robot-style), occasionly use syllable- tik or waa or ker">Cybertron</option>
+        <option value="something like ocean or aquatic (Fish like, Rhyming ,flowing), occasionly use syllable- flo or err or aqu ">Atlantic</option>
+        <option value="something like ork (rough , unintengible , chaotic), occasionly use syllable- wagh or hurr or taa ">Ork?</option>
+        <option value="something like Some complex european language (Aristocratic,  calm, professional), inspired by any european language">Kings Landing</option>
+        <option value="something like Desert (Catus, rought ,sandy, coarse),inspired by ancient egyptian writings ">Pyramids</option>
       </select>
+
 
       <label for="grammarSelect">Any real life language style you like:</label>
       <select id="grammarSelect">
@@ -150,7 +161,12 @@
         placeholder="Type a sentence to translate..."
         onkeypress="handleKeyPress(event)"
       >
-      <button onclick="sendPrompt()" id="sendButton">Generate Translation</button>
+      <button onclick="sendPrompt()" id="sendButton">Generate  Translation</button>
+    </div>
+
+    <div id  ="languageControls" class = "language-controls">
+      <button id ="continueBtn" class="continue-button" onclick="continueWithLanguage()">Continue with this language</button>
+      <button id ="resetBtn" class="reset-button" onclick="resetLanguage()">Create new language</button>
     </div>
 
     <div class="response-section">
@@ -161,6 +177,9 @@
     </div>
   </div>
     <script>
+         let isUsingStoredLanguage = false;
+         let currentLanguageName = null;
+
       async function sendPrompt() {
   const style = document.getElementById('styleSelect').value;
   const grammar = document.getElementById('grammarSelect').value;
@@ -186,8 +205,9 @@
     const response = await fetch("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ style, grammar, tone, sentence })
+      body: JSON.stringify({ style, grammar, tone, sentence , continueWithLanguage: isUsingStoredLanguage })
     });
+
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -196,6 +216,16 @@
     if (data.success && data.text) {
       responseBox.textContent = data.text;
       responseBox.className = "success";
+
+      if (data.canContinue){
+        document.getElementById('languageControls').style.display = 'block';
+        currentLanguageName = data.languageName;
+      }
+
+      if (data.hasStoredLanguage){
+        document.getElementById('currentLanguageName').textContent = data.languageName || 'Unknown';
+        document.getElementById('languageStatus').classList.add('active');
+        }
     } else {
       responseBox.textContent = "Error: " + (data.error || "Unknown error");
       responseBox.className = "error";
@@ -209,11 +239,52 @@
   }
 }
 
+
 function handleKeyPress(event) {
   if (event.key === "Enter") {
     sendPrompt();
   }
 }
+  function continueWithLanguage(){
+
+    isUsingStoredLanguage = true;
+    document.getElementById('languageControls').style.display = 'none';
+    document.getElementById('currentLanguageName').textContent = currentLanguageName;
+    document.getElementById('languageStatus').classList.add('active');
+    document.getElementById('promptInput').value = '';
+    document.getElementById('promptInput').placeholder =`Type a new sentence to translate to ${currentLanguageName}...`;
+  }
+
+  async function resetLanguage() {
+
+    try{
+     await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+
+        sentence: 'reset',
+        resetLanguage: true
+       })
+    });
+
+    }catch(error){
+      console.log('Reset request failed, but continuing ....');
+    }
+
+     isUsingStoredLanguage = false;
+     currentLanguageName = null;
+     document.getElementById('languageStatus').classList.remove('active');
+     document.getElementById('languageControls').style.diplay = 'none';
+     document.getElementById('promptInput').placeholder = 'Type a sentence to translate...';
+
+     document.getElementById('responseBox').textContent = 'Enter a sentence and select options above to get started!';
+
+     document.getElementById('responseBox').className = '';
+     
+    }
+ 
+
     </script>
 </body>
 </html>
