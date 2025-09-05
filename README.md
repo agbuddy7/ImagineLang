@@ -11,8 +11,7 @@ ImagineLang is a web application that empowers users to create their own constru
 
 
 ## Note
-1. it may not remeber the previous language generated.
-2. if it shows error try after sometime or refresh as server may be starting
+1. if it shows error try after sometime or refresh as server may be starting
 
 ##  Features
 
