@@ -10,13 +10,13 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #88389c;
         }
         
         .container {
             background: white;
             padding: 30px;
-       
+            border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
@@ -24,6 +24,7 @@
             text-align: center;
             color: #333;
             margin-bottom: 30px;
+            
         }
         
         .input-section {
@@ -34,7 +35,15 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: #555;
+            color: #8f7cb7;
+        }
+
+        select{
+             width: 50%;
+             height: 25px;
+             border-radius: 5px;
+              
+
         }
         
         #promptInput {
@@ -52,11 +61,11 @@
         }
         
         button {
-            background: #4285f4;
+            background: #662995;
             color: white;
             padding: 12px 24px;
             border: none;
-       
+            border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
             width: 100%;
@@ -64,7 +73,8 @@
         }
         
         button:hover {
-            background: #3367d6;
+            background: #e637e6;
+            
         }
         
         button:disabled {
@@ -99,7 +109,13 @@
             background: #ffeaea;
             border-color: #d73502;
         }
-        
+          #languageControls {
+            display: none;
+        }
+
+      .language-controls {
+       display: none;
+      }
         .success {
             color: #333;
             background: #f0f8ff;
@@ -171,14 +187,31 @@
 
     <div class="response-section">
       <label for="responseBox">Response:
-        (Note: it may not remember previous language if you regenerate )
+        (May take some time for reapeating)
       </label>
       <div id="responseBox">Enter a sentence and select options above to get started!</div>
     </div>
+      <div class="download-section">
+      <button class="download-btn" onclick="downloadHistory()" id="downloadBtn">
+        📥 Download Translation History
+      </button>
+      <div class="history-info">
+        <span id="historyCount">0 translations saved</span>
+      </div>
+    </div>
+  </div>
+
   </div>
     <script>
          let isUsingStoredLanguage = false;
          let currentLanguageName = null;
+          let translationHistory = [];
+
+          window.addEventListener('load', function() {
+        loadHistoryFromStorage();
+        updateHistoryCount();
+      });
+
 
       async function sendPrompt() {
   const style = document.getElementById('styleSelect').value;
@@ -216,6 +249,8 @@
     if (data.success && data.text) {
       responseBox.textContent = data.text;
       responseBox.className = "success";
+
+        saveToHistory(sentence, data.text, data.languageName, style, grammar, tone);
 
       if (data.canContinue){
         document.getElementById('languageControls').style.display = 'block';
@@ -283,6 +318,86 @@ function handleKeyPress(event) {
      document.getElementById('responseBox').className = '';
      
     }
+      function saveToHistory(originalText, translatedText, languageName, style, grammar, tone) {
+        const historyItem = {
+          timestamp: new Date().toLocaleString(),
+          originalText: originalText,
+          translatedText: translatedText,
+          languageName: languageName || 'Unknown Language',
+          style: style,
+          grammar: grammar,
+          tone: tone
+        };
+        translationHistory.unshift(historyItem); // Add to beginning of array
+        saveHistoryToStorage();
+        updateHistoryCount();
+      }
+      function loadHistoryFromStorage() {
+        const saved = localStorage.getItem('imagineLangHistory');
+        if (saved) {
+          translationHistory = JSON.parse(saved);
+        }
+      }
+
+      function saveHistoryToStorage() {
+        localStorage.setItem('imagineLangHistory', JSON.stringify(translationHistory));
+      }
+
+      function updateHistoryCount() {
+        const count = translationHistory.length;
+        document.getElementById('historyCount').textContent = `${count} translation${count !== 1 ? 's' : ''} saved`;
+        
+        
+        const downloadBtn = document.getElementById('downloadBtn');
+        downloadBtn.disabled = count === 0;
+      }
+       function downloadHistory() {
+        if (translationHistory.length === 0) {
+          alert('No translations to download yet! Start creating some languages first.');
+          return;
+        }
+
+        const content = generateTXT();
+        const filename = `imaginelang-history-${new Date().toISOString().split('T')[0]}.txt`;
+        downloadFile(content, filename);
+      }
+
+
+       function generateTXT() {
+        let txt = 'ImagineLang Translation History\n';
+        txt += '================================\n\n';
+        txt += `Generated: ${new Date().toLocaleString()}\n`;
+        txt += `Total Translations: ${translationHistory.length}\n\n`;
+
+        translationHistory.forEach((item, index) => {
+          txt += `${index + 1}. ${item.languageName} (${item.timestamp})\n`;
+          txt += `   English: "${item.originalText}"\n`;
+          txt += `   ${item.languageName}: "${item.translatedText}"\n`;
+          txt += `   Settings: ${item.style} | ${item.grammar} | ${item.tone}\n`;
+          txt += '\n';
+        });
+
+        txt += '---\n';
+        txt += 'Generated by ImagineLang - Create your own language!\n';
+        txt += 'https://imagine-lang.vercel.app\n';
+
+        return txt;
+      }
+
+       function downloadFile(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+
+
  
 
     </script>

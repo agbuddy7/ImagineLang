@@ -60,7 +60,7 @@ Create a sentence in an imaginary language with these settings:
 - Grammar: ${grammar || "SVO"}
 - Tone: ${tone || "neutral"}
 - Sentence to translate: "${sentence}"
-Remember: Output shouldn't be gibberish but should be different sounding unique, something people can read, you can mix different real world languages to create new one... etc.
+Remember: Output shouldn't be gibberish but should be different - sounding unique, something people can read, you can mix different real world languages to create new one... etc.
 
 Output format:
 
